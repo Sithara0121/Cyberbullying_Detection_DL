@@ -1,6 +1,16 @@
 using Statistics
 using Plots
 
+function build_model(hyperparams, input_dim)
+    h1, h2, _ = hyperparams
+    return Chain(
+        Dense(input_dim, round(Int, h1), relu),
+        Dense(round(Int, h1), round(Int, h2), relu),
+        Dense(round(Int, h2), 1),
+        sigmoid
+    )
+end
+
 function evaluate_model(model, X_test, y_test)
     y_pred = model(X_test') |> vec
     y_pred_class = y_pred .>= 0.45

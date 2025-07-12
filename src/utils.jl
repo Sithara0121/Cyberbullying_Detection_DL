@@ -2,6 +2,10 @@ using Random
 using Flux
 using Plots
 
+function accuracy(y_pred, y_true)
+    return sum(y_pred .== y_true) / length(y_true)
+end
+
 # Train-test split function
 function train_test_split(X, y, test_ratio=0.2)
     n = size(X, 1)
