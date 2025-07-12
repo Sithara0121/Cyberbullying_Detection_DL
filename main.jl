@@ -17,7 +17,7 @@ include("src/plot_utils.jl")
 
 # Step 1: Load dataset
 println("Step 1: Loading dataset...")
-df = load_dataset("tweets.csv")
+df = load_dataset("data/tweets.csv")
 println("Dataset loaded with $(nrow(df)) rows.")
 
 # Step 2: Preprocess tweet text
