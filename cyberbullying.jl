@@ -13,7 +13,7 @@ using Dates
 
 # Step 1: Load dataset
 println("Step 1: Loading dataset...")
-df = CSV.read("tweets.csv", DataFrame; ignoreemptylines=true)
+df = CSV.read("tweets.csv", DataFrame; ignoreemptyrows=true)
 #df = first(df, 2000)  # Limit to the first 2000 rows
 println("Dataset loaded with $(nrow(df)) rows.")
 
