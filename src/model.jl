@@ -1,5 +1,76 @@
 using Statistics
+using Flux
 using Plots
+include("rbm.jl")
+
+
+function pretrain_dbn(X::Matrix{Float32}, layer_dims::Vector{Int}; epochs::Int=5, batch_size::Int=64)
+    input = X
+    rbms = Vector{RBM}()
+
+    for n_hidden in layer_dims
+        println("Pretraining RBM layer with $n_hidden hidden units")
+
+        n_features = size(input, 1)
+        n_samples = size(input, 2)
+        lr = 0.1f0
+        rbm = init_rbm(n_features, n_hidden)
+
+        for epoch in 1:epochs
+            for i in 1:batch_size:n_samples
+                batch_end = min(i + batch_size - 1, n_samples)
+                x_batch = input[:, i:batch_end]  # select columns, not rows
+                cd1!(rbm, Matrix(x_batch), lr)   # no need to transpose
+            end
+            println("RBM Epoch $epoch done")
+        end
+
+        push!(rbms, rbm)
+        input = sigmoid.(rbm.W * input .+ rbm.hbias)  # forward to next layer
+    end
+
+    return rbms
+end
+
+
+
+using Flux
+
+using Flux
+
+function build_dbn_from_rbms(rbms::Vector{RBM}, output_dim::Int)
+    layers = []
+
+    # First layer: input_dim should be rbms[1].W |> size |> second
+    input_dim = size(rbms[1].W, 2)
+    for rbm in rbms
+        output_dim_rbm = size(rbm.W, 1)
+        push!(layers, Dense(input_dim, output_dim_rbm, relu))
+        input_dim = output_dim_rbm
+    end
+
+    # Output layer (e.g., for classification)
+    push!(layers, Dense(input_dim, output_dim))  # softmax added in loss function
+
+    return Chain(layers...)
+end
+
+function build_dbn_with_softmax_from_rbms(rbms::Vector{RBM}, output_dim::Int)
+    layers = []
+    for rbm in rbms
+        layer = Dense(size(rbm.W, 2), size(rbm.W, 1), relu)
+        layer.weight .= rbm.W
+        layer.bias .= rbm.hbias
+        push!(layers, layer)
+    end
+    last_hidden = size(rbms[end].W, 1)
+    push!(layers, Dense(last_hidden, output_dim))  # final layer before softmax
+    push!(layers, Flux.softmax)
+    return Chain(layers...)
+end
+
+
+
 
 function build_model(hyperparams, input_dim)
     h1, h2, _ = hyperparams
