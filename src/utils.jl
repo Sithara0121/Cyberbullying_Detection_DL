@@ -28,8 +28,9 @@ end
 function salp_swarm_algorithm(X_train, y_train, X_test, y_test, iterations, n_salps)
     println("\nRunning Salp Swarm Algorithm (SSA)")
     dim = 3
-    lb = [10.0, 10.0, 0.0001]
-    ub = [100.0, 100.0, 0.1]
+    lb = [10.0, 10.0, 0.0001]   # Lower bounds: [hidden1, hidden2, learning_rate]
+    ub = [200.0, 100.0, 0.05]   # Upper bounds extended for learning rate
+
     salps = [lb .+ rand(dim) .* (ub .- lb) for _ in 1:n_salps]
     fitness = [evaluate_fitness(X_train, y_train, X_test, y_test, s) for s in salps]
     best_idx = argmax(fitness)
@@ -40,15 +41,23 @@ function salp_swarm_algorithm(X_train, y_train, X_test, y_test, iterations, n_sa
 
     for iter in 1:iterations
         c1 = 2 * exp(-((4 * iter / iterations)^2))
+
         for i in 1:n_salps
             for d in 1:dim
                 if i == 1
+                    # Leader update
                     c2, c3 = rand(), rand()
                     move = c1 * ((ub[d] - lb[d]) * c2 + lb[d])
                     salps[i][d] = best_pos[d] + move * (c3 < 0.5 ? 1 : -1)
                 else
-                    salps[i][d] = (salps[i][d] + salps[i-1][d]) / 2
+                    # Follower update
+                    salps[i][d] = (salps[i][d] + salps[i - 1][d]) / 2
                 end
+
+                # Add small Gaussian noise (mutation)
+                salps[i][d] += randn() * 0.5
+
+                # Clip to bounds
                 salps[i][d] = clamp(salps[i][d], lb[d], ub[d])
             end
         end
@@ -62,9 +71,9 @@ function salp_swarm_algorithm(X_train, y_train, X_test, y_test, iterations, n_sa
 
         push!(fitness_over_time, best_fit)
 
-        println("Epoc $iter:")
-        println("  Best fitness: ", round(best_fit, digits=4))
-        println("  Best hyperparams: ", round.(best_pos, digits=4))
+        println("Epoch $iter:")
+       # println("  Best fit: ", round(best_fit, digits=4))
+       # println("  Best hyperparams: ", round.(best_pos, digits=4))
     end
 
     # Plot fitness over time
@@ -78,6 +87,7 @@ function salp_swarm_algorithm(X_train, y_train, X_test, y_test, iterations, n_sa
 
     return best_pos
 end
+
 
 # Fitness evaluation function
 function evaluate_fitness(X_train, y_train, X_test, y_test, hyperparams)
