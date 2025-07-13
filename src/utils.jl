@@ -72,8 +72,8 @@ function salp_swarm_algorithm(X_train, y_train, X_test, y_test, iterations, n_sa
         push!(fitness_over_time, best_fit)
 
         println("Epoch $iter:")
-        println("  Best fit: ", round(best_fit, digits=4))
-        println("  Best hyperparams: ", round.(best_pos, digits=4))
+       # println("  Best fit: ", round(best_fit, digits=4))
+       # println("  Best hyperparams: ", round.(best_pos, digits=4))
     end
 
     # Plot fitness over time

@@ -35,7 +35,7 @@ X_train, y_train, X_test, y_test = train_test_split(X_matrix, y)
 
 # Step 5: Salp Swarm Algorithm (SSA)
 println("Step 5: Starting Salp Swarm Algorithm (SSA)...")
-best_hyperparams = salp_swarm_algorithm(X_train, y_train, X_test, y_test, 10, 20)
+best_hyperparams = salp_swarm_algorithm(X_train, y_train, X_test, y_test, 5, 15)
 println("Best hyperparameters found: $best_hyperparams")
 
 # Extract hidden layer sizes
