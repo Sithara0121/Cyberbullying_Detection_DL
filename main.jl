@@ -35,7 +35,7 @@ X_train, y_train, X_test, y_test = train_test_split(X_matrix, y)
 
 # Step 5: Salp Swarm Algorithm (SSA)
 println("Step 5: Starting Salp Swarm Algorithm (SSA)...")
-best_hyperparams = salp_swarm_algorithm(X_train, y_train, X_test, y_test, 5, 15)
+best_hyperparams = salp_swarm_algorithm(X_train, y_train, X_test, y_test, 10, 20)
 println("Best hyperparameters found: $best_hyperparams")
 
 # Extract hidden layer sizes
@@ -52,7 +52,7 @@ model = build_dbn_with_softmax_from_rbms(rbms, 2)
 
 # Define loss function
 loss(model, x, y) = Flux.crossentropy(model(x), y)
-opt = Flux.setup(Descent(0.01), model)
+opt = Flux.setup(ADAM(0.001), model)
 
 # One-hot encode y
 y_train_onehot = Flux.onehotbatch(y_train, [false, true])
@@ -74,3 +74,13 @@ y_pred = model(X_test_T)
 pred_classes = Flux.onecold(y_pred, [false, true])
 acc = sum(pred_classes .== y_test) / length(y_test)
 println("Test Accuracy: $acc")
+tp = sum((pred_classes .== 1) .& (y_test .== true))
+fp = sum((pred_classes .== 1) .& (y_test .== false))
+fn = sum((pred_classes .== 0) .& (y_test .== true))
+
+precision = tp / max(tp + fp, 1)
+recall = tp / max(tp + fn, 1)
+f1 = 2 * precision * recall / max(precision + recall, 1)
+
+println("Test Accuracy: $acc")
+println("Precision: $precision, Recall: $recall, F1 Score: $f1")
